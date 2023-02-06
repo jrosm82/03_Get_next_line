@@ -6,7 +6,7 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:48:41 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/05 13:55:26 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/06 21:48:52 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 # include <stdio.h>
 # include <string.h>
 
-char	*get_next_line(int fd, int BUFFER_SIZE);
-
+char	*get_next_line(int fd);
 
 #endif
