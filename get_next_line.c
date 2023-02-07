@@ -6,7 +6,7 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:46:58 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/06 22:11:12 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/06 22:28:54 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,18 +75,18 @@ char	*ft_strndup(const char *s, size_t n)
 	return (res);
 }
 
-char    *ft_strcpy(char *s1, char *s2)
+char	*ft_strcpy(char *s1, char *s2)
 {
-      int i;
- 
-      i = 0;
-      while (s2[i])
-      {
-          s1[i] = s2[i];
-          i++;
-      }
-      s1[i] = s2[i];
-      return (s1);
+	int	i;
+
+	i = 0;
+	while (s2[i])
+	{
+		s1[i] = s2[i];
+		i++;
+	}
+	s1[i] = s2[i];
+	return (s1);
 }
 
 void	*ft_memmove(void *dest, const void *src, size_t n)
