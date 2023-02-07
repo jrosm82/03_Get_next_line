@@ -6,7 +6,7 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:46:58 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/06 22:28:54 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/07 10:05:27 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,64 +113,150 @@ void	*ft_memmove(void *dest, const void *src, size_t n)
 	return (dest);
 }
 
-char	*get_next_line(int fd)
+static int	fts_strlen(char const *str)
 {
-	char		*buf;
-	char		*new_line_ptr;
-	static char	backup[16384];
-	static char	*backup_ptr = backup;
-	int			read_len;
-	int			backup_len;
+	int	i;
 
-	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (buf == NULL)
-		return (NULL);
-	buf[BUFFER_SIZE] = '\0';
-	backup_len = ft_strlen(backup_ptr);
-	new_line_ptr = ft_strchr(backup_ptr, '\n');
-	while (new_line_ptr == NULL)
-	{
-		read_len = read(fd, buf, BUFFER_SIZE);
-		if (read_len <= 0)
-		{
-			free(buf);
-			if (backup_len == 0)
-				return (NULL);
-			buf = ft_strdup(backup_ptr);
-			backup_ptr = backup;
-			backup_ptr[0] = '\0';
-			return (buf);
-		}
-		buf[read_len] = '\0';
-		ft_strcpy(backup_ptr + backup_len, buf);
-		backup_len += read_len;
-		new_line_ptr = ft_strchr(backup_ptr, '\n');
-	}
-	free(buf);
-	buf = ft_strndup(backup_ptr, new_line_ptr - backup_ptr + 1);
-	backup_len -= (new_line_ptr - backup_ptr + 1);
-	ft_memmove(backup_ptr, new_line_ptr + 1, backup_len + 1);
-	return (buf);
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
 }
-/*
+
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	int		i;
+	int		j;
+	char	*str;
+
+	i = 0;
+	j = 0;
+	str = (char *)malloc(sizeof(char) * (fts_strlen(s1) + fts_strlen(s2) + 1));
+	if (!str)
+		return (NULL);
+	while (s1[j] != '\0')
+		str[i++] = s1[j++];
+	j = 0;
+	while (s2[j] != '\0')
+		str[i++] = s2[j++];
+	str[i] = '\0';
+	return (str);
+}
+
+char	*ft_strnew(size_t size)
+{
+	char	*str;
+
+	if (!(str = (char *)malloc(sizeof(char) * size + 1)))
+		return (NULL);
+	str[size] = '\0';
+	while (size--)
+		str[size] = '\0';
+	return (str);
+}
+
+char	*ft_substr(char const *s, unsigned int start, size_t len)
+{
+	char	*ptr;
+	size_t	size;
+	size_t	i;
+
+	i = 0;
+	if (!s)
+		return (NULL);
+	size = ft_strlen(s);
+	if (start >= size)
+		return (ft_strdup(""));
+	if (start + len > size)
+		len = size - start;
+	ptr = (char *)malloc(sizeof(char) * (len + 1));
+	if (ptr == NULL)
+		return (NULL);
+	while (i < len)
+	{
+		ptr[i] = s[start];
+		i++;
+		start++;
+	}
+	ptr[i] = '\0';
+	return (ptr);
+}
+
+char	*get_next_line(int fd, int BUFFER_SIZE)
+{
+	char		*buffer;	
+	static char	*st_line;
+	char 		*temp;
+	
+	if ( st_line == NULL)
+		st_line = ft_strnew(1);
+
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);	
+	buffer[BUFFER_SIZE] = '\0';
+	
+	while ((ft_strchr(st_line, '\n') == NULL) && (read(fd, buffer, BUFFER_SIZE) != 0))
+	{		
+		if (buffer == NULL)
+			return (NULL);
+		temp = (char *)malloc(sizeof(char)* (ft_strlen(st_line) + ft_strlen(buffer) + 1));
+		temp = ft_strjoin(st_line, buffer);
+		st_line = ft_strdup(temp);
+	}
+	free(temp);
+	free(buffer);
+	int	i = 0;
+	while (st_line[i] != '\n')
+		i++;	
+	temp = ft_substr(st_line, 0, i + 1);
+	int 	j = i;
+	while (st_line[i] != '\0')	
+		i++;
+	st_line = ft_substr(st_line, j + 1, i - j - 1);
+
+	return (temp);
+}
+
 #include <fcntl.h>
 
 int	main(void)
 {
 	char	*toprint;
-	int	BUFFER_SIZE = 50;
-	int fd = open("big_line_no_nl.txt", O_RDONLY | O_CREAT);
+	int	BUFFER_SIZE = 100;
+	int fd = open("toread.txt", O_RDONLY | O_CREAT);
+	
 
 
 	
-	//printf("\n");
-
-	while ((toprint = get_next_line(fd, BUFFER_SIZE)) != NULL )
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	
+	
+	
+	/*while ((toprint = get_next_line(fd, BUFFER_SIZE)) != NULL )
 	{
 		printf("%s", toprint);
-	}
+	}*/
 
 	close(fd);
 
 	return (0);
-}*/
+}
