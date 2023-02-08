@@ -6,7 +6,7 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:46:58 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/08 15:51:29 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/08 16:42:42 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,13 +220,14 @@ char *ft_strcat(char *dest, const char *src)
 	return (dest);
 }
 
-char	*get_next_line(int fd, int BUFFER_SIZE)
+char	*get_next_line(int fd)
 {
 	char		*buffer;	
 	static char	*st_line;
 	char 		*temp;
-	int		cnt;
-	
+	int		i;
+
+	i = 0;
 	if ( st_line == NULL)
 		st_line = ft_strnew(1);
 
@@ -234,57 +235,54 @@ char	*get_next_line(int fd, int BUFFER_SIZE)
 	if (!buffer)
 		return (NULL);	
 	buffer[BUFFER_SIZE] = '\0';
-	
-	while ((ft_strchr(st_line, '\n') == NULL) && ((cnt = read(fd, buffer, BUFFER_SIZE)) != 0))
-	{		
-		if (buffer == NULL)
-			return (NULL);
+
+	while ((ft_strchr(st_line, '\n') == NULL) && ((i = read(fd, buffer, BUFFER_SIZE)) != 0))
+	{	
+		if (i < BUFFER_SIZE)
+		{
+			while (i < BUFFER_SIZE)
+			{
+				buffer[i] = '\0';
+				i++;
+			}
+		}	
 		temp = (char *)malloc(sizeof(char)* (ft_strlen(st_line) + ft_strlen(buffer) + 1));
 		temp = ft_strjoin(st_line, buffer);
 		st_line = ft_strdup(temp);
 	}
-
-	if (cnt == 0 && st_line != NULL)
+	if (i < BUFFER_SIZE && st_line[0] != '\0')
 	{
-		temp = ft_strdup(st_line);
-		st_line = ft_strdup(NULL);
-		return(temp);
-	}
-	else if (cnt == 0 && st_line == NULL)
-		return NULL;
-	free(temp);
-	free(buffer);
-
-	if( cnt < BUFFER_SIZE)
-		return (ft_strdup(st_line));
-	else
-	{
-		int	i = 0;
-		while (st_line[i] != '\n')
-			i++;	
-		temp = ft_substr(st_line, 0, i + 1);
-		int 	j = i;
-		while (st_line[i] != '\0')	
-			i++;
-		st_line = ft_substr(st_line, j + 1, i - j - 1);
-
+		st_line = ft_strdup("");
 		return (temp);
 	}
-}
+	else if (i < BUFFER_SIZE && st_line[0] == '\0')
+		return (NULL);
+	free(temp);
+	free(buffer);
+	i = 0;
+	while (st_line[i] != '\n')
+		i++;	
+	temp = ft_substr(st_line, 0, i + 1);
+	int 	j = i;
+	while (st_line[i] != '\0')	
+		i++;
+	st_line = ft_substr(st_line, j + 1, i - j - 1);
 
+	return (temp);
+}
+/*
 
 #include <fcntl.h>
 
 int	main(void)
 {
 	char	*toprint;
-	int	BUFFER_SIZE =  5;
+	int	BUFFER_SIZE =   10;
 	int fd = open("toread.txt", O_RDONLY | O_CREAT);
 	
 
 
 	
-	/*printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
@@ -304,7 +302,8 @@ int	main(void)
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	printf("%s", get_next_line(fd, BUFFER_SIZE));*/
+	printf("%s", get_next_line(fd, BUFFER_SIZE));
+	//printf("%s", get_next_line(fd, BUFFER_SIZE));
 	
 	
 	
@@ -316,4 +315,4 @@ int	main(void)
 	close(fd);
 
 	return (0);
-}
+}*/
