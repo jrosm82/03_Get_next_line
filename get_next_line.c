@@ -6,7 +6,7 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:46:58 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/08 16:42:42 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/09 19:33:25 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,72 +57,6 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-char	*ft_strndup(const char *s, size_t n)
-{
-	char			*res;
-	unsigned int	i;
-
-	i = 0;
-	res = malloc(sizeof(char) * (n + 1));
-	if (res == NULL)
-		return (NULL);
-	while (i < n)
-	{
-		res[i] = s[i];
-		i++;
-	}
-	res[i] = '\0';
-	return (res);
-}
-
-char	*ft_strcpy(char *s1, char *s2)
-{
-	int	i;
-
-	i = 0;
-	while (s2[i])
-	{
-		s1[i] = s2[i];
-		i++;
-	}
-	s1[i] = s2[i];
-	return (s1);
-}
-
-void	*ft_memmove(void *dest, const void *src, size_t n)
-{	
-	size_t	i;
-
-	i = 0;
-	if (dest == src)
-		return (dest);
-	if (dest < src)
-	{
-		while (i < n)
-		{
-			((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
-			i++;
-		}
-	}
-	else
-	{	
-		i = n + 1;
-		while (--i)
-			((unsigned char *)dest)[i - 1] = ((unsigned char *)src)[i - 1];
-	}
-	return (dest);
-}
-
-static int	fts_strlen(char const *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i] != '\0')
-		i++;
-	return (i);
-}
-
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	int		i;
@@ -131,7 +65,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 
 	i = 0;
 	j = 0;
-	str = (char *)malloc(sizeof(char) * (fts_strlen(s1) + fts_strlen(s2) + 1));
+	str = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
 	if (!str)
 		return (NULL);
 	while (s1[j] != '\0')
@@ -182,107 +116,74 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	return (ptr);
 }
 
-char	*ft_strncpy(char *dest, char *src, unsigned int n)
-{
-	unsigned int	i;
 
-	i = 0;
-	while (*(src + i) != '\0' && i < n)
-	{
-		*(dest + i) = *(src + i);
-		i++;
-	}
-	while (i < n)
-	{
-		*(dest + i) = '\0';
-		i++;
-	}
-	return (dest);
-}
-
-
-char *ft_strcat(char *dest, const char *src)
-{
-	unsigned int i;
-	unsigned int j;
-
-	i = 0;
-	while (dest[i] != '\0')
-		i++;
-	j = 0;
-	while (src[j] != '\0')
-	{
-		dest[i] = src[j];
-		i++;
-		j++;
-	}
-	dest[i] = '\0';
-	return (dest);
-}
-
-char	*get_next_line(int fd)
+char	*get_next_line(int fd, int BUFFER_SIZE)
 {
 	char		*buffer;	
 	static char	*st_line;
 	char 		*temp;
-	int		i;
-
-	i = 0;
-	if ( st_line == NULL)
-		st_line = ft_strnew(1);
+	int		cnt;
 
 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buffer)
-		return (NULL);	
+		return (NULL);
 	buffer[BUFFER_SIZE] = '\0';
-
-	while ((ft_strchr(st_line, '\n') == NULL) && ((i = read(fd, buffer, BUFFER_SIZE)) != 0))
-	{	
-		if (i < BUFFER_SIZE)
-		{
-			while (i < BUFFER_SIZE)
-			{
-				buffer[i] = '\0';
-				i++;
-			}
-		}	
-		temp = (char *)malloc(sizeof(char)* (ft_strlen(st_line) + ft_strlen(buffer) + 1));
-		temp = ft_strjoin(st_line, buffer);
-		st_line = ft_strdup(temp);
-	}
-	if (i < BUFFER_SIZE && st_line[0] != '\0')
+	cnt = 0;
+	while(ft_strchr(buffer, '\n') == NULL && (cnt = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
-		st_line = ft_strdup("");
+
+		if (!buffer)
+			return (NULL);		
+		if (st_line == NULL)
+			st_line = ft_strnew(0);
+		if (cnt < BUFFER_SIZE)
+		{
+			buffer[cnt] = '\0';
+			st_line = ft_strjoin(st_line, ft_substr(buffer, 0, cnt));
+		}
+		else
+		{	
+			st_line = ft_strjoin(st_line, buffer);
+		}		
+	}
+	free(buffer);
+	buffer = NULL;
+	if (st_line == NULL)	
+		return (NULL);
+	else if (ft_strchr(st_line, '\n') == NULL)
+	{
+		temp = ft_strdup(st_line);
+		free(st_line);	
+		st_line = NULL;	
 		return (temp);
 	}
-	else if (i < BUFFER_SIZE && st_line[0] == '\0')
-		return (NULL);
-	free(temp);
-	free(buffer);
-	i = 0;
-	while (st_line[i] != '\n')
-		i++;	
-	temp = ft_substr(st_line, 0, i + 1);
-	int 	j = i;
-	while (st_line[i] != '\0')	
-		i++;
-	st_line = ft_substr(st_line, j + 1, i - j - 1);
-
-	return (temp);
+	else
+	{
+		cnt = 0;
+		while (st_line[cnt] != '\n')
+			cnt++;	
+		temp = ft_substr(st_line, 0, cnt + 1);
+		int 	j = cnt;
+		while (st_line[cnt] != '\0')	
+			cnt++;
+		st_line = ft_substr(st_line, j + 1, cnt - j - 1);
+		return (temp);
+	}
 }
-/*
+
 
 #include <fcntl.h>
 
 int	main(void)
 {
 	char	*toprint;
-	int	BUFFER_SIZE =   10;
+	int	BUFFER_SIZE =   2;
 	int fd = open("toread.txt", O_RDONLY | O_CREAT);
 	
 
 
 	
+	/*printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
@@ -299,11 +200,7 @@ int	main(void)
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
 	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	printf("%s", get_next_line(fd, BUFFER_SIZE));
-	//printf("%s", get_next_line(fd, BUFFER_SIZE));
+	printf("%s", get_next_line(fd, BUFFER_SIZE));*/
 	
 	
 	
@@ -315,4 +212,4 @@ int	main(void)
 	close(fd);
 
 	return (0);
-}*/
+}
