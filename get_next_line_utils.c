@@ -6,11 +6,30 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/04 21:47:53 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/22 21:28:35 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/25 21:31:17 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+char	*ft_strncat(char *dest, char *src, int nb)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (dest[i] != '\0')
+		i++;
+	j = 0;
+	while (src[j] != '\0' && j < nb)
+	{
+		dest[i] = src[j];
+		i++;
+		j++;
+	}
+	dest[i] = '\0';
+	return (dest);
+}
 
 int	ft_strlen(const char *s)
 {

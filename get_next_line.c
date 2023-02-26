@@ -6,21 +6,58 @@
 /*   By: jrosmari <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 10:01:57 by jrosmari          #+#    #+#             */
-/*   Updated: 2023/02/22 22:08:03 by jrosmari         ###   ########.fr       */
+/*   Updated: 2023/02/26 11:28:45 by jrosmari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	buf_work(char **st_line, int fd, int buf_size)
+static char	*ft_strcpy(char *dest, char *src)
 {
-	char	*buffer;	
+	int	i;
+
+	i = 0;
+	while (src[i] != '\0')
+	{
+		dest[i] = src[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (dest);
+}
+
+static int	read_and_append(char **st_line, int fd, char *buffer, int cnt)
+{
 	char	*temp;
-	int		cnt;
 	int		rd;
 
-	cnt = 0;
-	rd = 0;
+	while (1)
+	{
+		rd = read(fd, buffer, BUFFER_SIZE);
+		if (rd <= 0)
+			break ;
+		temp = malloc(ft_strlen(*st_line) + rd + 1);
+		if (!temp)
+			return (-1);
+		ft_strcpy(temp, *st_line);
+		ft_strncat(temp, buffer, rd);
+		free(*st_line);
+		*st_line = ft_strdup(temp);
+		free(temp);
+		if (ft_strchr(*st_line, '\n') != NULL)
+		{
+			cnt = 1;
+			break ;
+		}
+		cnt = 0;
+	}
+	return (cnt);
+}
+
+static int	buf_work(char **st_line, int fd, int buf_size, int cnt)
+{
+	char	*buffer;
+
 	buffer = (char *)malloc(sizeof(char) * (buf_size + 1));
 	if (!buffer)
 		return (-1);
@@ -33,31 +70,12 @@ int	buf_work(char **st_line, int fd, int buf_size)
 		cnt = 0;
 	else
 		cnt = -1;
-	while ((rd = read(fd, buffer, buf_size)) > 0)
-	{
-		temp = malloc(ft_strlen(*st_line) + rd + 1);
-		if (!temp)
-			return (-1);
-		strcpy(temp, *st_line);
-		strncat(temp, buffer, rd);
-		free(*st_line);
-		*st_line = NULL;
-		*st_line = ft_strdup(temp);
-		free(temp);
-		temp = NULL;
-		if (strchr(*st_line, '\n') != NULL)
-		{
-			cnt = 1;
-			break ;
-		}
-		cnt = 0;
-	}
+	cnt = read_and_append(st_line, fd, buffer, cnt);
 	free(buffer);
-	buffer = NULL;
 	return (cnt);
 }
 
-char	*line_cut(char **st_line)
+static char	*line_cut(char **st_line)
 {
 	char	*rtrn;
 	char	*rest;
@@ -67,7 +85,7 @@ char	*line_cut(char **st_line)
 	while ((*st_line)[cnt] != '\n')
 		cnt++;
 	rtrn = ft_substr(*st_line, 0, cnt + 1);
-	rest = ft_substr(*st_line, cnt + 1, strlen(*st_line) - (cnt + 1));
+	rest = ft_substr(*st_line, cnt + 1, ft_strlen(*st_line) - (cnt + 1));
 	free(*st_line);
 	*st_line = NULL;
 	*st_line = ft_strdup(rest);
@@ -84,14 +102,14 @@ char	*get_next_line(int fd)
 
 	if (st_line == NULL)
 	{
-		st_line = malloc(1);
+		st_line = (char *)malloc(1);
 		if (!st_line)
 			return (NULL);
 		st_line[0] = '\0';
 	}
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	result = buf_work(&st_line, fd, BUFFER_SIZE);
+	result = buf_work(&st_line, fd, BUFFER_SIZE, 0);
 	if (result == -1)
 		return (NULL);
 	if (result == 1)
@@ -101,8 +119,8 @@ char	*get_next_line(int fd)
 	st_line = NULL;
 	return (rt_line);
 }
-/*#include <fcntl.h>
-
+/*
+#include <fcntl.h>
 int	main(void)
 {
 	int	BUFFER_SIZE = 10;
@@ -110,7 +128,6 @@ int	main(void)
 	
 	int fd = open("bigline.txt", O_RDONLY | O_CREAT);
 	
-
 	
 	
 	
@@ -118,11 +135,7 @@ int	main(void)
 	{
 		printf("%s", toprint);
 	}
-
 	close(fd);
-
 	return (0);
-
-
 	return (0);
 }*/
